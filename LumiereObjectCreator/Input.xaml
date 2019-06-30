@@ -1,0 +1,26 @@
+﻿<local:BaseDialogWindow x:Class="LumiereObjectCreator.Input"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:LumiereObjectCreator"
+			 xmlns:shell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+             mc:Ignorable="d"
+
+						Margin="0"
+
+						BorderThickness="0"
+			AllowsTransparency="True"
+			WindowStartupLocation="CenterScreen"
+			Background="{DynamicResource {x:Static shell:VsBrushes.ToolWindowTabGradientKey}}"
+			TextElement.Foreground="{DynamicResource {x:Static shell:VsBrushes.CommandBarTextActiveKey}}" WindowStyle="None" MouseDown="WindowMouseDown" ResizeMode="NoResize" ShowInTaskbar="False" SizeToContent="WidthAndHeight">
+
+	<StackPanel Margin="4" FocusManager.FocusedElement="{Binding ElementName=txtAnswer}">
+		<Label Foreground="{DynamicResource {x:Static shell:VsBrushes.ToolWindowTabTextKey}}" Background="{DynamicResource {x:Static shell:VsBrushes.ToolWindowTabGradientKey}}" Name="lblType" Grid.Column="1">Type:</Label>
+		<ComboBox Name="txtType" SelectedIndex="0" KeyDown="OnKeyDownHandler">
+		</ComboBox>
+		<Label Foreground="{DynamicResource {x:Static shell:VsBrushes.ToolWindowTabTextKey}}" Background="{DynamicResource {x:Static shell:VsBrushes.ToolWindowTabGradientKey}}" Name="lblName" Grid.Column="1">Name:</Label>
+		<TextBox Name="txtAnswer" Grid.Column="1" Grid.Row="1" MinWidth="200" ForceCursor="True" KeyDown="OnKeyDownHandler">
+		</TextBox>
+	</StackPanel>
+</local:BaseDialogWindow> 

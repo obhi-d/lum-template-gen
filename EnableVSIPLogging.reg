@@ -1,0 +1,5 @@
+Windows Registry Editor Version 5.00
+[HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\16.0\General]
+"EnableVSIPLogging"=dword:00000000
+[HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\16.1\General]
+"EnableVSIPLogging"=dword:00000000

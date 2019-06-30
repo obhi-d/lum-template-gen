@@ -1,0 +1,12 @@
+{
+	"common": [
+		{
+			"reg": "\\$\\(([a-zA-Z0-9]+)\\)",
+			"sub": "${{cookiecutter.\\1}}"
+		}
+	],
+	"fileNames": [
+	],
+	"contents": [
+	]
+}
