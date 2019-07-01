@@ -1,6 +1,7 @@
 ﻿using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
@@ -13,22 +14,7 @@ namespace LumiereObjectCreator
     /// </summary>
     internal sealed class CreateLumiereObject
     {
-        static private string[] KnownObjectTypeFolders =
-        {
-            "Unknown",
-            "Module-Bin",
-            "Module-Data",
-            "Module-Extern",
-            "Module-Lib",
-            "Module-Plugin",
-            "Module-Ref",
-            "Module-Test",
-            "LocalHeader",
-            "Header",
-            "Source",
-            "LocalClass",
-            "Class"
-        };
+        static private List<string> templateTypes = null;
 
         /// <summary>
         /// Command ID.
@@ -46,6 +32,9 @@ namespace LumiereObjectCreator
         private readonly LumiereObjectCreatorPackage package;
 
         private Options options;
+        private string kTemplateName_Source;
+        private string kTemplateName_LocalHeader;
+        private string kTemplateName_Header;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateLumiereObject"/> class.
@@ -112,7 +101,25 @@ namespace LumiereObjectCreator
             string templateFolderPath = GetTemplateLocation(path, options.TemplateLocation);
             if (!string.IsNullOrEmpty(path))
             {
-                var input = new Input(templateFolderPath);
+                if (templateTypes == null)
+                {
+                    templateTypes = PathHelpers.GetSubDirectories(templateFolderPath);
+                    for (int i = 0; i < templateTypes.Count; ++i)
+                    {
+                        if (templateTypes[i].Contains("Source("))
+                            kTemplateName_Source = templateTypes[i];
+                        else if (templateTypes[i].Contains("LocalHeader("))
+                            kTemplateName_LocalHeader = templateTypes[i];
+                        else if (templateTypes[i].Contains("Header("))
+                            kTemplateName_Header = templateTypes[i];
+                    }
+                }
+                if (templateTypes.Count <= 0)
+                {
+                    System.Windows.Forms.MessageBox.Show("No templates found!");
+                    return;
+                }
+                var input = new Input(templateTypes);
                 input.ShowModal();
                 string objectType = null;
                 string objectName = null;
@@ -174,19 +181,21 @@ namespace LumiereObjectCreator
             string frameworkName;
             string moduleName;
             GetFrameworkAndModule(path, out frameworkName, out moduleName);
+            if (objectType.Contains("Module"))
+                moduleName = sanName;
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = "python.exe";
             start.Arguments = string.Format("{0} " +
                 "--name={1} " +
-                "--type={2} " +
+                "--type=\"{2}\" " +
                 "--author=\"{3}\" " +
                 "--email=\"{4}\" " +
-                "--templates={5} " +
+                "--templates=\"{5}\" " +
                 "--framework=\"{6}\" " +
                 "--module=\"{7}\" " +
-                "--file={8} " +
-                "--rules={9} " +
-                "--destroot={10}",
+                "--file=\"{8}\" " +
+                "--rules=\"{9}\" " +
+                "--destroot=\"{10}\"",
                 GetScriptsLocation(path) + "\\build_system\\build_utils\\from_template.py",
                 sanName,
                 objectType,
@@ -199,7 +208,7 @@ namespace LumiereObjectCreator
                 GetRulesFile(path, options.RulesLocation),
                 rootPath
                 );
-            outputPane.OutputString(start.Arguments);
+            outputPane.OutputString("[INFO] Python: " + start.Arguments + "\r\n\n");
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             IServiceProvider service = this.package as IServiceProvider;
@@ -209,9 +218,31 @@ namespace LumiereObjectCreator
                 using (StreamReader reader = process.StandardOutput)
                 {
                     string result = reader.ReadToEnd();
+                    List<string> files = ParseFilesCreated(result);
+                    if (files != null && files.Count > 0)
+                    {
+                        OpenFiles(dte2, files);
+                    }
                     outputPane.OutputString(result);
                 }
             }
+        }
+
+        private void OpenFiles(EnvDTE80.DTE2 dte2, List<string> files)
+        {
+            foreach (var file in files)
+                dte2.ExecuteCommand("File.OpenFile", file);
+        }
+
+        private List<string> ParseFilesCreated(string result)
+        {
+            List<string> list = new List<string>();
+            foreach (var line in result.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (line.StartsWith("[FILE] "))
+                    list.Add(line.Substring(7));
+            }
+            return list;
         }
 
         private string GetPlacementLocation(string path)
@@ -271,6 +302,8 @@ namespace LumiereObjectCreator
                     else
                         moduleName = code;
                 }
+                else
+                    frameworkName = code;
             }
         }
 
@@ -287,45 +320,43 @@ namespace LumiereObjectCreator
             {
                 sanitized = sanitized.Substring(0, index);
             }
-            return sanitized;
+            return sanitized.Trim();
         }
 
         private string DetermineType(string path, string objectType, string objectName)
         {
             if (objectType == "Auto")
             {
-                if (path.Contains("\\src"))
-                    return "Source";
+                int index = objectName.IndexOf(':');
+                if (index > 0)
+                {
+                    // guess by header
+                    for (int i = 0; i < templateTypes.Count; ++i)
+                    {
+                        string header = (i + 1).ToString() + ':';
+                        if (objectName.StartsWith(header))
+                            return templateTypes[i];
+                        int open = templateTypes[i].LastIndexOf('(');
+                        int close = templateTypes[i].LastIndexOf(')');
+                        if (open > 0 && close > 0)
+                        {
+                            header = templateTypes[i].Substring(open + 1, close - (open + 1)) + ':';
+                            if (objectName.StartsWith(header))
+                                return templateTypes[i];
+                        }
+                    }
+                }
+                if (path.Contains("\\src") || objectName.EndsWith(".cpp") ||
+                    objectName.EndsWith(".cxx"))
+                    return kTemplateName_Source;
                 if (path.Contains("\\local_include"))
-                    return "LocalHeader";
-                if (objectName.EndsWith(".cpp"))
-                    return "Source";
-                else if (objectName.EndsWith(".cxx"))
-                    return "Source";
-                else if (objectName.EndsWith(".h"))
-                    return "Header";
-                else if (objectName.EndsWith(".hpp"))
-                    return "Header";
-                else if (objectName.EndsWith(".hxx"))
-                    return "Header";
-                else if (objectName.StartsWith("l:"))
-                    return "LocalClass";
-                else if (objectName.StartsWith("mb:"))
-                    return "Module-Bin";
-                else if (objectName.StartsWith("ml:"))
-                    return "Module-Lib";
-                else if (objectName.StartsWith("md:"))
-                    return "Module-Data";
-                else if (objectName.StartsWith("me:"))
-                    return "Module-Extern";
-                else if (objectName.StartsWith("mp:"))
-                    return "Module-Plugin";
-                else if (objectName.StartsWith("mr:"))
-                    return "Module-Ref";
-                else if (objectName.StartsWith("mt:"))
-                    return "Module-Test";
-                else
-                    return "Class";
+                    return kTemplateName_LocalHeader;
+                if (path.Contains("\\include") ||
+                    objectName.EndsWith(".h") ||
+                    objectName.EndsWith(".hpp") ||
+                    objectName.EndsWith(".hxx"))
+                    return kTemplateName_Header;
+                return "Class";
             }
             else
                 return objectType;

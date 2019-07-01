@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Windows.Input;
 
 namespace LumiereObjectCreator
@@ -12,16 +11,9 @@ namespace LumiereObjectCreator
         public string result = "";
         public string objectType = "Auto";
 
-        public Input(string scanPath)
+        public Input(List<string> sourceList)
         {
             InitializeComponent();
-            string[] source = Directory.GetDirectories(scanPath);
-            List<string> sourceList = new List<string>();
-            sourceList.Add("Auto");
-            foreach (var dir in source)
-            {
-                sourceList.Add(dir.Substring(dir.LastIndexOf(Path.DirectorySeparatorChar) + 1));
-            }
             this.txtType.ItemsSource = sourceList;
         }
 

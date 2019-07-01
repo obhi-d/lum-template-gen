@@ -7,15 +7,23 @@
 			 xmlns:shell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
              mc:Ignorable="d"
 
-						Margin="0"
-
-						BorderThickness="0"
+			Margin="2"
+			BorderThickness="0"
 			AllowsTransparency="True"
 			WindowStartupLocation="CenterScreen"
 			Background="{DynamicResource {x:Static shell:VsBrushes.ToolWindowTabGradientKey}}"
 			TextElement.Foreground="{DynamicResource {x:Static shell:VsBrushes.CommandBarTextActiveKey}}" WindowStyle="None" MouseDown="WindowMouseDown" ResizeMode="NoResize" ShowInTaskbar="False" SizeToContent="WidthAndHeight">
 
 	<StackPanel Margin="4" FocusManager.FocusedElement="{Binding ElementName=txtAnswer}">
+		<Border
+			Margin="10,10,10,10"
+
+            BorderThickness="1"
+            CornerRadius="10">
+			<Border.Effect>
+				<DropShadowEffect />
+			</Border.Effect>
+		</Border>
 		<Label Foreground="{DynamicResource {x:Static shell:VsBrushes.ToolWindowTabTextKey}}" Background="{DynamicResource {x:Static shell:VsBrushes.ToolWindowTabGradientKey}}" Name="lblType" Grid.Column="1">Type:</Label>
 		<ComboBox Name="txtType" SelectedIndex="0" KeyDown="OnKeyDownHandler">
 		</ComboBox>
