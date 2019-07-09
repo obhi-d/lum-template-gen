@@ -1,14 +1,10 @@
 ﻿using Microsoft.VisualStudio.Shell;
-using System;
 using System.ComponentModel;
 
 namespace LumiereObjectCreator
 {
     public class Options : DialogPage
     {
-        private String author;
-        private String email;
-        private String templates;
         public const string Key = "LumTemplateSettings";
 
         [Category("General")]

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="LumiereObjectCreator.eedb7a7f-01c2-4c7c-8273-6e34a86ceae9" Version="1.1.2" Language="en-US" Publisher="Abhishek Dey" />
+        <Identity Id="LumiereObjectCreator.eedb7a7f-01c2-4c7c-8273-6e34a86ceae9" Version="1.1.6" Language="en-US" Publisher="Abhishek Dey" />
         <DisplayName>LumiereObjectCreator</DisplayName>
-        <Description xml:space="preserve">Empty VSIX Project.</Description>
+        <Description xml:space="preserve">Lumiere factory.</Description>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />
