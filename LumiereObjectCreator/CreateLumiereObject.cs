@@ -1,8 +1,12 @@
-﻿using EnvDTE;
-using Microsoft.VisualStudio.Shell;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
+using EnvDTE;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using System.Diagnostics;
 using System.IO;
 using Task = System.Threading.Tasks.Task;
@@ -24,12 +28,12 @@ namespace LumiereObjectCreator
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
-        public static readonly Guid CommandSet = new Guid("f61c6a20-962e-4ff4-8547-480162ef662f");
+        public static readonly Guid CommandSet = new Guid("d0c09a17-5862-4bfe-a7e4-5709e628ffc8");
 
         /// <summary>
         /// VS Package that provides this command, not null.
         /// </summary>
-        private readonly LumiereObjectCreatorPackage package;
+        private readonly CreateLumiereObjectPackage package;
 
         private Options options;
         private string kTemplateName_Source;
@@ -42,7 +46,7 @@ namespace LumiereObjectCreator
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
-        private CreateLumiereObject(LumiereObjectCreatorPackage package, OleMenuCommandService commandService, Options options)
+        private CreateLumiereObject(CreateLumiereObjectPackage package, OleMenuCommandService commandService, Options options)
         {
             this.options = options;
             this.package = package ?? throw new ArgumentNullException(nameof(package));
@@ -74,7 +78,7 @@ namespace LumiereObjectCreator
         /// Initializes the singleton instance of the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
-        public static async Task InitializeAsync(LumiereObjectCreatorPackage package)
+        public static async Task InitializeAsync(CreateLumiereObjectPackage package)
         {
             // Switch to the main thread - the call to AddCommand in CreateLumiereObject's constructor requires
             // the UI thread.
@@ -99,7 +103,7 @@ namespace LumiereObjectCreator
 
             string path = ProjectHelpers.GetSelectedFilePath(this.package as IServiceProvider);
             string templateFolderPath = GetTemplateLocation(path, options.TemplateLocation);
-            if (!string.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(templateFolderPath))
             {
                 if (templateTypes == null)
                 {

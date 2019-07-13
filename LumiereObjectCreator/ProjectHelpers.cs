@@ -10,7 +10,7 @@ namespace LumiereObjectCreator
     {
         public static string GetSelectedFilePath(IServiceProvider serviceProvider)
         {
-            IVsMonitorSelection monitorSelection = serviceProvider.GetService<SVsShellMonitorSelection, IVsMonitorSelection>();
+            IVsMonitorSelection monitorSelection = (IVsMonitorSelection)serviceProvider.GetService(typeof(IVsMonitorSelection));
 
             monitorSelection.GetCurrentSelection(out IntPtr hierarchyPtr, out uint itemId, out _, out _);
             if (hierarchyPtr != IntPtr.Zero)
