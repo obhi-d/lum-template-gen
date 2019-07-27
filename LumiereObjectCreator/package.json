@@ -1,0 +1,106 @@
+{
+    "name": "lumiere-object-creator",
+    "displayName": "Lumiere Object Creator",
+    "description": "Lumiere object template for vscode",
+    "version": "0.4.4",
+    "publisher": "obhi",
+    "icon": "Resources/CreateLumiereObject.png",
+    "license": "SEE LICENSE IN LICENSE.md",
+    "main": "./out/src/extension",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/obhi-d/lum-template-gen.git"
+    },
+    "engines": {
+        "vscode": "^1.28.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "Template",
+        "File",
+        "Folder"
+    ],
+    "activationEvents": [
+        "*",
+        "onCommand:lumiereObjectCreator.newFile"
+    ],
+    "contributes": {
+        "commands": [
+            {
+                "command": "lumiereObjectCreator.newFile",
+                "title": "Lumiere!",
+                "category": "Files"
+            }
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "command": "lumiereObjectCreator.newFile",
+                    "group": "navigation"
+                }
+            ]
+        },
+        "keybindings": [
+            {
+                "command": "lumiereObjectCreator.newFile",
+                "key": "ctrl+alt+n"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Lumiere Object Creator",
+            "properties": {
+                "lumiereObjectCreator.templatesPath": {
+                    "type": "string",
+                    "description": "Path where templates are stored",
+                    "default": "Templates"
+                },
+                "lumiereObjectCreator.openFileByFileTemplate": {
+                    "type": "boolean",
+                    "description": "Open the file when the file is created by file template",
+                    "default": true
+                },
+                "lumiereObjectCreator.openFilesByFolderTemplate": {
+                    "type": "boolean",
+                    "description": "Open all files when the files is created by folder template",
+                    "default": false
+                },
+                "lumiereObjectCreator.fields.author": {
+                    "type": "string",
+                    "description": "Custom fields of Template Generator: author"
+                },
+                "lumiereObjectCreator.fields.email": {
+                    "type": "string",
+                    "description": "Custom fields of Template Generator: email"
+                },
+                "lumiereObjectCreator.fields.rules": {
+                    "type": "string",
+                    "description": "Rules file location."
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "@types/lodash": "^4.14.99",
+        "@types/mocha": "^2.2.48",
+        "@types/mz": "0.0.32",
+        "@types/node": "^9.4.0",
+        "mocha": "^5.0.0",
+        "typescript": "^2.6.2",
+        "vscode": "^1.1.10"
+    },
+    "dependencies": {
+        "@types/mkdirp": "^0.5.2",
+        "lodash": "^4.17.4",
+        "mkdirp": "^0.5.1",
+        "mz": "^2.7.0"
+    }
+}
