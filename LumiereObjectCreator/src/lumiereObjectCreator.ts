@@ -6,6 +6,7 @@ import { Input } from './input';
 import * as ps from 'child_process'
 import * as os from 'os'
 import * as vscode from 'vscode';
+import {PythonShell} from 'python-shell';
 
 export interface ItemLocation {
   framework?: string;
@@ -177,30 +178,40 @@ export class LumiereObjectCreator {
     let itemLoc = this.frameworkAndModule(this.selection);
     if (type.indexOf("Module") >= 0)
       itemLoc.module = sanName;
-    let proc = "python";
+    let proc = require('hasbin').sync("python3") ? "python3" : "python";
     let scriptLoc = path.join(
       this.getScriptsLocation(this.selection),
       'build_system',
-      'build_utils',
-      'from_template.py');
+      'build_utils');
 
-    let args = [scriptLoc,
-      '--name="' + sanName + '"',
-      '--type="' + type + '"',
-      '--author="' + env.config.get('fields.author') + '"',
-      '--email="' + env.config.get('fields.email') + '"',
-      '--templates="' + env.templatesFolderPath + '"',
-      '--framework="' + itemLoc.framework + '"',
-      '--module="' + itemLoc.module + '"',
-      '--file="' + this.objectName + '"',
-      '--rules="' + this.getRulesFile(this.selection, env.config.get('fields.rules')) + '"',
-      '--destroot="' + this.getPlacementLocation(this.selection) + '"',
+    let args = [
+      '--name=' + sanName,
+      '--type=' + type,
+      '--author=' + env.config.get('fields.author'),
+      '--email=' + env.config.get('fields.email'),
+      '--templates=' + env.templatesFolderPath,
+      '--framework=' + itemLoc.framework,
+      '--module=' + itemLoc.module,
+      '--file=' + this.objectName,
+      '--rules=' + this.getRulesFile(this.selection, env.config.get('fields.rules')),
+      '--destroot=' + this.getPlacementLocation(this.selection),
     ];
-    let pythonProc = ps.spawn(proc, args);
-    env.output.appendLine('[COMMAND] ' + args.join(' '));
+        
+    env.output.appendLine('[COMMAND] python ' + args.join(' '));
     env.output.show();
-    pythonProc.stdout.on('data', (data) => {
-      this.processFilesCreated(data.toString());
+    PythonShell.run('from_template.py', {
+      mode: 'text',
+      pythonPath: proc,
+      pythonOptions: ['-u'],
+      scriptPath: scriptLoc,
+      args : args
+    }, function (err, results) {
+      if (err) throw err;
+      // results is an array consisting of messages collected during execution
+      results.forEach(element => {
+        this.processFilesCreated(element);  
+      });
+      
     });
   }
 

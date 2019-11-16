@@ -7,7 +7,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('lumiereObjectCreator.newFile', async function(e: vscode.Uri) {
             try {
-                let targetFolderPath = e && e.fsPath ? e.fsPath : vscode.workspace.rootPath;
+                let targetFolderPath = e && e.fsPath ? e.fsPath : vscode.workspace.workspaceFolders[0].uri.fsPath;
                 let creator = new LumiereObjectCreator(targetFolderPath);
                 await creator.run();
             } catch (error) {

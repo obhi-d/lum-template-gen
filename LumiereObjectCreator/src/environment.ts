@@ -15,7 +15,7 @@ export class Environment {
 
     public get templatesFolderPath(): string {
         let templPath = this.config.get<string>('templatesPath');
-        return templPath ? path.join(vscode.workspace.rootPath, templPath) : path.join(os.homedir(), '.vscode/templates');
+        return templPath ? path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, templPath) : path.join(os.homedir(), '.vscode/templates');
     }
 }
 
