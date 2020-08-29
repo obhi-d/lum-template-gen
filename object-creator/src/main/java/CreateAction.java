@@ -12,6 +12,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.content.Content;
 import org.intellij.sdk.settings.AppSettingsState;
+import org.intellij.sdk.toolwindow.PluginLog;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +24,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 
 public class CreateAction extends AnAction {
 
@@ -33,9 +35,9 @@ public class CreateAction extends AnAction {
         Template() {}
         Template(String name) {
             this.name = name;
-            if (name.matches("^[0-9].*$"))
+            if (name.matches("^[0-9].*$")) {
                 this.weight = Integer.valueOf(name.substring(0, name.indexOf('.')));
-            else
+            } else
                 this.weight = 0;
         }
 
@@ -125,9 +127,7 @@ public class CreateAction extends AnAction {
                 this.k_templateClass = templ;
             templates[f + 1] = templ;
         }
-        Arrays.sort(templates, 1, templates.length, (o1, o2) -> {
-            return o1.weight - o2.weight;
-        });
+        Arrays.sort(templates, 1, templates.length, Comparator.comparingInt(o -> o.weight));
     }
 
     private String determineType(String selectionPath,
@@ -273,11 +273,14 @@ public class CreateAction extends AnAction {
 
                     String ret = in.readLine();
                     while(ret != null) {
-                        ToolWindow toolWindow = ToolWindowManager.getInstance(event.getProject()).getToolWindow("Lumiere");
-                        ConsoleView consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(event.getProject()).getConsole();
-                        Content content = toolWindow.getContentManager().getFactory().createContent(consoleView.getComponent(), "Lumiere Output", false);
-                        toolWindow.getContentManager().addContent(content);
-                        consoleView.print(ret, ConsoleViewContentType.NORMAL_OUTPUT);
+                        PluginLog.view.print(ret + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
+                        ret = in.readLine();
+                    }
+
+                    in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                    ret = in.readLine();
+                    while(ret != null) {
+                        PluginLog.view.print(ret + "\n", ConsoleViewContentType.ERROR_OUTPUT);
                         ret = in.readLine();
                     }
                 }catch (Exception exception) {

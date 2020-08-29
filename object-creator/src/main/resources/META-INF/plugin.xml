@@ -16,7 +16,7 @@
                                  displayName="Lumiere Settings"/>
         <toolWindow id="Lumiere"
                     anchor="bottom"
-                    factoryClass="com.intellij.execution.services.ServiceViewToolWindowFactory"></toolWindow>
+                    factoryClass="org.intellij.sdk.toolwindow.PluginLog"></toolWindow>
     </extensions>
 
     <actions>
