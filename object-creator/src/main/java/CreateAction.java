@@ -1,16 +1,16 @@
-import com.intellij.execution.filters.TextConsoleBuilderFactory;
-import com.intellij.execution.ui.ConsoleView;
+package main.java;
+
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.pom.Navigatable;
-import com.intellij.ui.content.Content;
 import org.intellij.sdk.settings.AppSettingsState;
 import org.intellij.sdk.toolwindow.PluginLog;
 import org.jetbrains.annotations.NotNull;
@@ -18,25 +18,21 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 
 public class CreateAction extends AnAction {
-
     public static class Template {
         String name;
         int weight;
 
-        Template() {}
         Template(String name) {
             this.name = name;
             if (name.matches("^[0-9].*$")) {
-                this.weight = Integer.valueOf(name.substring(0, name.indexOf('.')));
+                this.weight = Integer.parseInt(name.substring(0, name.indexOf('.')));
             } else
                 this.weight = 0;
         }
@@ -113,6 +109,7 @@ public class CreateAction extends AnAction {
     private void setTemplateLocation(Path templateLoc) {
         File folder = new File(templateLoc.toUri());
         File[] list = folder.listFiles();
+        assert list != null;
         templates = new Template[list.length + 1];
         templates[0] = new Template("Auto");
         for (int f = 0; f < list.length; ++f) {
@@ -221,7 +218,7 @@ public class CreateAction extends AnAction {
         return new FrameworkModule(frameworkName, moduleName);
     }
 
-    private void parsePath(AnActionEvent event, String path) {
+    private void parsePath(String path, @Nullable Project project) {
         selection = path.substring("PsiDirectory:".length());
         int index = selection.indexOf("Frameworks");
         if (index > 0) {
@@ -271,20 +268,27 @@ public class CreateAction extends AnAction {
                     Process process = Runtime.getRuntime().exec(command);
                     BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
+                    ToolWindowManager.getInstance(project).getToolWindow("Lumiere");
                     String ret = in.readLine();
-                    while(ret != null) {
+                    while(ret != null && PluginLog.view != null) {
                         PluginLog.view.print(ret + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
                         ret = in.readLine();
                     }
 
                     in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
                     ret = in.readLine();
-                    while(ret != null) {
+                    while(ret != null && PluginLog.view != null) {
                         PluginLog.view.print(ret + "\n", ConsoleViewContentType.ERROR_OUTPUT);
                         ret = in.readLine();
                     }
                 }catch (Exception exception) {
-                    Messages.showMessageDialog("Failed to execute:\n" + command, "Lumiere Error", Messages.getErrorIcon());
+                    StringWriter errors = new StringWriter();
+                    exception.printStackTrace(new PrintWriter(errors));
+                    String msg = errors.toString();
+                    if (msg == null)
+                        msg = exception.toString();
+                    if (msg != null)
+                        Messages.showMessageDialog("Failed to execute:\n" + command + "\nException: " + msg, "Lumiere Error", Messages.getErrorIcon());
                 }
 
             }
@@ -293,13 +297,14 @@ public class CreateAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
+
         // Using the event, create and show a dialog
         // If an element is selected in the editor, add info about it.
         Navigatable nav = event.getData(CommonDataKeys.NAVIGATABLE);
         if (nav != null) {
             String path = nav.toString();
             if (path.startsWith("PsiDirectory:")) {
-                parsePath(event, path);
+                parsePath(path, event.getProject());
             }
         }
     }

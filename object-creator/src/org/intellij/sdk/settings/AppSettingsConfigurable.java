@@ -38,7 +38,7 @@ public class AppSettingsConfigurable implements Configurable {
   public boolean isModified() {
     AppSettingsState settings = AppSettingsState.getInstance();
     boolean modified = !mySettingsComponent.getUserName().equals(settings.userName);
-    modified |= mySettingsComponent.getUserEmail() != settings.userEmail;
+    modified |= !mySettingsComponent.getUserEmail().equals(settings.userEmail);
     return modified;
   }
 
