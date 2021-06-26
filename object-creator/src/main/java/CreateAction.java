@@ -99,6 +99,7 @@ public class CreateAction extends AnAction {
     }
 
     static public Path kScript = Paths.get("Scripts","build_system", "build_utils", "from_template.py");
+    static public Path kScriptRoot = Paths.get("Scripts");
 
 
     @Override
@@ -218,6 +219,53 @@ public class CreateAction extends AnAction {
         return new FrameworkModule(frameworkName, moduleName);
     }
 
+    private void generateEnum(String path, @Nullable Project project) {
+        selection = path.substring("PsiFile:".length());
+        int index = selection.indexOf("Frameworks");
+        if (index > 0) {
+
+            String source = selection.substring(0, index);
+            Path script = Paths.get(source, kScriptRoot.toString());
+            String program = "python3";
+            if (System.getProperty("os.name").contains("Windows"))
+                program = "python";
+            try {
+                Runtime.getRuntime().exec(program + " --version");
+            } catch (Exception exception) {
+                program = "python";
+            }
+
+            String command = program + " -m build_system.build_utils.enums --auto " + selection.toString();
+
+            try {
+                Process process = Runtime.getRuntime().exec(command, null, new File(script.toUri()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+                ToolWindowManager.getInstance(project).getToolWindow("Lumiere");
+                String ret = in.readLine();
+                while(ret != null && PluginLog.view != null) {
+                    PluginLog.view.print(ret + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
+                    ret = in.readLine();
+                }
+
+                in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                ret = in.readLine();
+                while(ret != null && PluginLog.view != null) {
+                    PluginLog.view.print(ret + "\n", ConsoleViewContentType.ERROR_OUTPUT);
+                    ret = in.readLine();
+                }
+            }catch (Exception exception) {
+                StringWriter errors = new StringWriter();
+                exception.printStackTrace(new PrintWriter(errors));
+                String msg = errors.toString();
+                if (msg == null)
+                    msg = exception.toString();
+                if (msg != null)
+                    Messages.showMessageDialog("Failed to execute:\n" + command + "\nException: " + msg, "Lumiere Error", Messages.getErrorIcon());
+            }
+        }
+    }
+
     private void parsePath(String path, @Nullable Project project) {
         selection = path.substring("PsiDirectory:".length());
         int index = selection.indexOf("Frameworks");
@@ -305,6 +353,8 @@ public class CreateAction extends AnAction {
             String path = nav.toString();
             if (path.startsWith("PsiDirectory:")) {
                 parsePath(path, event.getProject());
+            } else if (path.startsWith("PsiFile:") && path.endsWith("Enums.json")) {
+                generateEnum(path, event.getProject());
             }
         }
     }
