@@ -8,9 +8,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.pom.Navigatable;
+import com.intellij.psi.PsiFile;
 import org.intellij.sdk.settings.AppSettingsState;
 import org.intellij.sdk.toolwindow.PluginLog;
 import org.jetbrains.annotations.NotNull;
@@ -47,16 +49,17 @@ public class CreateAction extends AnAction {
     String selection;
     String objectName;
     Template[] templates;
-    
-    public  Template k_templateSource;
-    public  Template k_templateLocalHeader;
-    public  Template k_templateHeader;
-    public  Template k_templateClass;
+
+    public Template k_templateSource;
+    public Template k_templateLocalHeader;
+    public Template k_templateHeader;
+    public Template k_templateClass;
 
 
     public static class FrameworkModule {
         String framework;
         String module;
+
         FrameworkModule(String f, String m) {
             framework = f;
             module = m;
@@ -80,7 +83,8 @@ public class CreateAction extends AnAction {
         }
 
         @Override
-        public @Nullable JComponent getPreferredFocusedComponent() {
+        public @Nullable
+        JComponent getPreferredFocusedComponent() {
             return name;
         }
 
@@ -98,7 +102,7 @@ public class CreateAction extends AnAction {
         }
     }
 
-    static public Path kScript = Paths.get("Scripts","build_system", "build_utils", "from_template.py");
+    static public Path kScript = Paths.get("Scripts", "build_system", "build_utils", "from_template.py");
     static public Path kScriptRoot = Paths.get("Scripts");
 
 
@@ -129,8 +133,8 @@ public class CreateAction extends AnAction {
     }
 
     private String determineType(String selectionPath,
-                                Template template,
-                                String objectName) {
+                                 Template template,
+                                 String objectName) {
         if (template.name.equals("Auto")) {
             int index = objectName.indexOf(':');
             if (index >= 0) {
@@ -162,7 +166,7 @@ public class CreateAction extends AnAction {
             return template.name;
 
     }
-    
+
     private String getPlacementLocation(String selPath) {
         String search = "Frameworks" + File.separator;
         int index = selPath.indexOf(search);
@@ -172,8 +176,7 @@ public class CreateAction extends AnAction {
                 int module = selPath.indexOf(File.separator, index + 1);
                 if (module >= 0) {
                     return selPath.substring(0, module);
-                }
-                else if (index + 1 < selPath.length())
+                } else if (index + 1 < selPath.length())
                     return selPath;
                 else
                     return selPath.substring(0, index);
@@ -181,7 +184,7 @@ public class CreateAction extends AnAction {
         }
         return selPath;
     }
-    
+
     private String sanitizeName() {
         String sanitized = this.objectName;
         int index = sanitized.indexOf(':');
@@ -209,22 +212,18 @@ public class CreateAction extends AnAction {
                 index = code.indexOf(File.separator);
                 if (index >= 0) {
                     moduleName = code.substring(0, index);
-                }
-                else
+                } else
                     moduleName = code;
-            }
-            else
+            } else
                 frameworkName = code;
         }
         return new FrameworkModule(frameworkName, moduleName);
     }
 
     private void generateEnum(String path, @Nullable Project project) {
-        selection = path.substring("PsiFile:".length());
-        int index = selection.indexOf("Frameworks");
+        int index = path.indexOf("Frameworks");
         if (index > 0) {
-
-            String source = selection.substring(0, index);
+            String source = path.substring(0, index);
             Path script = Paths.get(source, kScriptRoot.toString());
             String program = "python3";
             if (System.getProperty("os.name").contains("Windows"))
@@ -235,7 +234,7 @@ public class CreateAction extends AnAction {
                 program = "python";
             }
 
-            String command = program + " -m build_system.build_utils.enums --auto " + selection.toString();
+            String command = program + " -m build_system.build_utils.enums --auto " + path.toString();
 
             try {
                 Process process = Runtime.getRuntime().exec(command, null, new File(script.toUri()));
@@ -243,18 +242,18 @@ public class CreateAction extends AnAction {
 
                 ToolWindowManager.getInstance(project).getToolWindow("Lumiere");
                 String ret = in.readLine();
-                while(ret != null && PluginLog.view != null) {
+                while (ret != null && PluginLog.view != null) {
                     PluginLog.view.print(ret + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
                     ret = in.readLine();
                 }
 
                 in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
                 ret = in.readLine();
-                while(ret != null && PluginLog.view != null) {
+                while (ret != null && PluginLog.view != null) {
                     PluginLog.view.print(ret + "\n", ConsoleViewContentType.ERROR_OUTPUT);
                     ret = in.readLine();
                 }
-            }catch (Exception exception) {
+            } catch (Exception exception) {
                 StringWriter errors = new StringWriter();
                 exception.printStackTrace(new PrintWriter(errors));
                 String msg = errors.toString();
@@ -280,7 +279,7 @@ public class CreateAction extends AnAction {
 
             TypeDialogWrapper dialog = new TypeDialogWrapper();
             dialog.setTemplates(templates);
-            if(dialog.showAndGet()) {
+            if (dialog.showAndGet()) {
                 objectName = dialog.name.getText();
                 Template template = templates[dialog.comboBox.getSelectedIndex()];
                 String type = this.determineType(this.selection, template, this.objectName);
@@ -302,7 +301,7 @@ public class CreateAction extends AnAction {
                 }
 
                 String command = program + " " + script.toString() + " --name=\"" + sanName +
-                "\" --type=\"" + type +
+                        "\" --type=\"" + type +
                         "\" --author=\"" + settings.userName +
                         "\" --email=\"" + settings.userEmail +
                         "\" --templates=\"" + templateLoc.toString() +
@@ -318,18 +317,18 @@ public class CreateAction extends AnAction {
 
                     ToolWindowManager.getInstance(project).getToolWindow("Lumiere");
                     String ret = in.readLine();
-                    while(ret != null && PluginLog.view != null) {
+                    while (ret != null && PluginLog.view != null) {
                         PluginLog.view.print(ret + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
                         ret = in.readLine();
                     }
 
                     in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
                     ret = in.readLine();
-                    while(ret != null && PluginLog.view != null) {
+                    while (ret != null && PluginLog.view != null) {
                         PluginLog.view.print(ret + "\n", ConsoleViewContentType.ERROR_OUTPUT);
                         ret = in.readLine();
                     }
-                }catch (Exception exception) {
+                } catch (Exception exception) {
                     StringWriter errors = new StringWriter();
                     exception.printStackTrace(new PrintWriter(errors));
                     String msg = errors.toString();
@@ -343,6 +342,12 @@ public class CreateAction extends AnAction {
         }
     }
 
+    private void displayMessage(String msg)
+    {
+        JOptionPane.showMessageDialog(null,
+                msg, "Lumiere Error", JOptionPane.ERROR_MESSAGE);
+    }
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
 
@@ -353,8 +358,10 @@ public class CreateAction extends AnAction {
             String path = nav.toString();
             if (path.startsWith("PsiDirectory:")) {
                 parsePath(path, event.getProject());
-            } else if (path.startsWith("PsiFile:") && path.endsWith("Enums.json")) {
-                generateEnum(path, event.getProject());
+            } else if (path.startsWith("JsonFile:") && path.endsWith("Enums.json")) {
+                VirtualFile vFile = event.getData(CommonDataKeys.VIRTUAL_FILE);
+                String jspath = vFile.getPath();
+                generateEnum(jspath, event.getProject());
             }
         }
     }
