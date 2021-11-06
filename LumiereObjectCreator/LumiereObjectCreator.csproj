@@ -46,6 +46,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BaseDialogWindow.cs" />
+    <Compile Include="BuildLumiereObject.cs" />
     <Compile Include="CreateLumiereObject.cs" />
     <Compile Include="Input.xaml.cs" />
     <Compile Include="Options.cs">

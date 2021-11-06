@@ -92,6 +92,7 @@ namespace LumiereObjectCreator
 
 		private void GenerateEnum(string path)
 		{
+			ThreadHelper.ThrowIfNotOnUIThread();
 			int index = path.IndexOf("Frameworks");
 			if (index > 0)
 			{
@@ -99,7 +100,7 @@ namespace LumiereObjectCreator
 				string script = Path.Combine(source, kScriptRoot);
 
 				var dte2 = (EnvDTE80.DTE2)this.package._DTE;
-				var outputPane = GetOutputWindow(dte2.ToolWindows.OutputWindow.OutputWindowPanes);
+				var outputPane = ProjectHelpers.GetOutputWindow(dte2.ToolWindows.OutputWindow.OutputWindowPanes);
 
 				ProcessStartInfo start = new ProcessStartInfo();
 				start.FileName = "python.exe";
@@ -111,13 +112,20 @@ namespace LumiereObjectCreator
 				outputPane.OutputString("[INFO] Python: " + start.Arguments + "\r\n\n");
 				IServiceProvider service = this.package as IServiceProvider;
 
-				using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(start))
+				try
 				{
-					using (StreamReader reader = process.StandardOutput)
+					using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(start))
 					{
-						string result = reader.ReadToEnd();
-						outputPane.OutputString(result);
+						using (StreamReader reader = process.StandardOutput)
+						{
+							string result = reader.ReadToEnd();
+							outputPane.OutputString(result);
+						}
 					}
+				}
+				catch(Exception ex)
+				{
+					outputPane.OutputString("[ERROR] Exception : " + ex.Message);
 				}
 			}
 		}
@@ -222,15 +230,16 @@ namespace LumiereObjectCreator
 
 		private void ExecuteOnObject(string path, string templatePath, string objectType, string objectName)
 		{
+			ThreadHelper.ThrowIfNotOnUIThread();
 			var dte2 = (EnvDTE80.DTE2)this.package._DTE;
-			var outputPane = GetOutputWindow(dte2.ToolWindows.OutputWindow.OutputWindowPanes);
+			var outputPane = ProjectHelpers.GetOutputWindow(dte2.ToolWindows.OutputWindow.OutputWindowPanes);
 
 			string rootPath = GetPlacementLocation(path);
 			objectType = DetermineType(path, objectType, objectName);
 			string sanName = SantizeName(objectName);
 			string frameworkName;
 			string moduleName;
-			GetFrameworkAndModule(path, out frameworkName, out moduleName);
+			PathHelpers.GetFrameworkAndModule(path, out frameworkName, out moduleName);
 			if (objectType.Contains("Module"))
 				moduleName = sanName;
 			ProcessStartInfo start = new ProcessStartInfo();
@@ -263,18 +272,26 @@ namespace LumiereObjectCreator
 			start.RedirectStandardOutput = true;
 			IServiceProvider service = this.package as IServiceProvider;
 
-			using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(start))
+			try
 			{
-				using (StreamReader reader = process.StandardOutput)
+
+				using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(start))
 				{
-					string result = reader.ReadToEnd();
-					List<string> files = ParseFilesCreated(result);
-					if (files != null && files.Count > 0)
+					using (StreamReader reader = process.StandardOutput)
 					{
-						OpenFiles(dte2, files);
+						string result = reader.ReadToEnd();
+						List<string> files = ParseFilesCreated(result);
+						if (files != null && files.Count > 0)
+						{
+							OpenFiles(dte2, files);
+						}
+						outputPane.OutputString(result);
 					}
-					outputPane.OutputString(result);
 				}
+			}
+			catch (Exception ex)
+			{
+				outputPane.OutputString("[ERROR] Exception : " + ex.Message);
 			}
 		}
 
@@ -317,45 +334,7 @@ namespace LumiereObjectCreator
 			}
 			return path;
 		}
-
-		private OutputWindowPane GetOutputWindow(OutputWindowPanes outputWindowPanes)
-		{
-			for (uint i = 1; i <= outputWindowPanes.Count; i++)
-			{
-				if (outputWindowPanes.Item(i).Name.Equals("Lumiere", StringComparison.CurrentCultureIgnoreCase))
-				{
-					return outputWindowPanes.Item(i);
-				}
-			}
-			return outputWindowPanes.Add("Lumiere");
-		}
-
-		private void GetFrameworkAndModule(string path, out string frameworkName, out string moduleName)
-		{
-			frameworkName = "";
-			moduleName = "";
-			string search = "Frameworks\\";
-			int index = path.IndexOf(search);
-			if (index > 0)
-			{
-				string code = path.Substring(index + search.Length);
-				index = code.IndexOf('\\');
-				if (index > 0)
-				{
-					frameworkName = code.Substring(0, index);
-					code = code.Substring(index + 1);
-					index = code.IndexOf('\\');
-					if (index > 0)
-					{
-						moduleName = code.Substring(0, index);
-					}
-					else
-						moduleName = code;
-				}
-				else
-					frameworkName = code;
-			}
-		}
+				
 
 		private string SantizeName(string objectName)
 		{

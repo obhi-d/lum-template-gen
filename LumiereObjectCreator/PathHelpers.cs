@@ -23,6 +23,34 @@ namespace LumiereObjectCreator
             return int.Parse(s1.Substring(s1start, s1.IndexOf('.', s1start) - s1start)) - int.Parse(s2.Substring(s2start, s2.IndexOf('.', s2start) - s2start));
         }
 
+        public static void GetFrameworkAndModule(string path, out string frameworkName, out string moduleName)
+        {
+            frameworkName = "";
+            moduleName = "";
+            string search = "Frameworks\\";
+            int index = path.IndexOf(search);
+            if (index > 0)
+            {
+                string code = path.Substring(index + search.Length);
+                index = code.IndexOf('\\');
+                if (index > 0)
+                {
+                    frameworkName = code.Substring(0, index);
+                    code = code.Substring(index + 1);
+                    index = code.IndexOf('\\');
+                    if (index > 0)
+                    {
+                        moduleName = code.Substring(0, index);
+                    }
+                    else
+                        moduleName = code;
+                }
+                else
+                    frameworkName = code;
+            }
+        }
+
+
         public static List<String> GetSubDirectories(string scanPath)
         {
             string[] source = Directory.GetDirectories(scanPath);

@@ -22,16 +22,23 @@
     <Buttons>
       <Button guid="guidLumiereObjectCreatorPackageCmdSet" id="CreateLumiereObjectId" priority="0x0100" type="Button">
         <Parent guid="guidLumiereObjectCreatorPackageCmdSet" id="MyMenuGroup" />
-        <Icon guid="guidImages" id="icon" />
+        <Icon guid="guidImages" id="lumiereIcon" />
         <Strings>
           <ButtonText>Lumiere!</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="guidLumiereObjectCreatorPackageCmdSet" id="BuildLumiereObjectId" priority="0x0200" type="Button">
+        <Parent guid="guidLumiereObjectCreatorPackageCmdSet" id="MyMenuGroup" />
+        <Icon guid="guidImages" id="buildIcon" />
+        <Strings>
+          <ButtonText>Build!</ButtonText>
         </Strings>
       </Button>
     </Buttons>
 
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
     <Bitmaps>
-      <Bitmap guid="guidImages" href="Resources\CreateLumiereObject.png" usedList="icon" />
+      <Bitmap guid="guidImages" href="Resources\CreateLumiereObject.png" usedList="lumiereIcon, buildIcon"  />
     </Bitmaps>
   </Commands>
 
@@ -46,10 +53,12 @@
     <GuidSymbol name="guidLumiereObjectCreatorPackageCmdSet" value="{f61c6a20-962e-4ff4-8547-480162ef662f}">
       <IDSymbol name="MyMenuGroup" value="0x1020" />
       <IDSymbol name="CreateLumiereObjectId" value="0x0100" />
+      <IDSymbol name="BuildLumiereObjectId" value="0x0200" />
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{2f4be332-a21b-4eb1-a56d-12539ce2485d}">
-      <IDSymbol name="icon" value="1" />
+      <IDSymbol name="lumiereIcon" value="1" />
+      <IDSymbol name="buildIcon" value="2" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

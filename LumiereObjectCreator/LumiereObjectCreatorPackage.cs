@@ -53,6 +53,7 @@ namespace LumiereObjectCreator
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             _DTE = await GetServiceAsync(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
             await CreateLumiereObject.InitializeAsync(this);
+            await BuildLumiereObject.InitializeAsync(this);
         }
 
         #endregion Package Members
