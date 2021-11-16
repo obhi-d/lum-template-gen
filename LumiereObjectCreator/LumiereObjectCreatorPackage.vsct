@@ -47,7 +47,7 @@
       <IDSymbol name="aspxContextMenu" value="0x2" />
     </GuidSymbol>
     <!-- This is the package guid. -->
-    <GuidSymbol name="guidLumiereObjectCreatorPackage" value="{8a42c1ba-f922-4274-bead-12214bbff2dd}" />
+    <GuidSymbol name="guidLumiereObjectCreatorPackage" value="{150CD9C3-94E6-45DA-9360-76573B48B61F}" />
 
     <!-- This is the guid used to group the menu commands together -->
     <GuidSymbol name="guidLumiereObjectCreatorPackageCmdSet" value="{f61c6a20-962e-4ff4-8547-480162ef662f}">

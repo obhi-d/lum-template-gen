@@ -96,11 +96,21 @@ namespace LumiereObjectCreator
 			// Show a message box to prove we were here
 			var dte2 = (EnvDTE80.DTE2)this.package._DTE;
 			var outputPane = ProjectHelpers.GetOutputWindow(dte2.ToolWindows.OutputWindow.OutputWindowPanes);
-
-			string path = ProjectHelpers.GetSelectedFilePath(this.package as IServiceProvider);
-			string frameworkName;
-			string moduleName;
-			PathHelpers.GetFrameworkAndModule(path, out frameworkName, out moduleName);
+			// outputPane.OutputString("Name: " + dte2.Solution.SolutionBuild.ActiveConfiguration.Name);
+			string path = ProjectHelpers.GetSelectedFilePath(package);
+			var cfg = PathHelpers.GetBuildConfig(path);
+			if (cfg == null)
+			{
+				outputPane.OutputString("Failed to get configs!");
+				return;
+			}
+			if (cfg.Count == 1)
+				cfg[0].Build(outputPane);
+			else
+			{
+				var buildType = new BuildType(cfg, outputPane);
+				buildType.ShowModal();
+			}
 			// OtherContextMenus.WorkspaceContextMenu.CMake.Compile
 		}
 

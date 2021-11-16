@@ -50,6 +50,29 @@ namespace LumiereObjectCreator
             }
         }
 
+        internal static List<BuildConfig> GetBuildConfig(string path)
+        {
+            string search = "source\\Frameworks\\";
+            int index = path.IndexOf(search);
+            if (index > 0)
+            {
+                string build = path.Substring(0, index) + "build\\.vs\\x64\\"; // assume build as the build folder
+                string[] source = Directory.GetDirectories(build);
+                if (source.Length == 0)
+                    return null;
+                List<BuildConfig> configs = new List<BuildConfig>();
+                string framework;
+                string moduleObj;
+                GetFrameworkAndModule(path, out framework, out moduleObj);
+                string target = framework + "." + moduleObj;
+                foreach (var dir in source)
+                {
+                    configs.Add(new BuildConfig(dir.Substring(dir.LastIndexOf(Path.DirectorySeparatorChar) + 1), target, dir));
+                }
+                return configs;
+            }
+            return null;
+        }
 
         public static List<String> GetSubDirectories(string scanPath)
         {

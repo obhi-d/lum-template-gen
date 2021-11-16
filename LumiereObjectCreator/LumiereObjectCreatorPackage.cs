@@ -26,17 +26,15 @@ namespace LumiereObjectCreator
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(LumiereObjectCreatorPackage.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideOptionPage(typeof(Options),
-    "Lumiere", "General", 0, 0, true)]
+    [ProvideOptionPage(typeof(Options), "Lumiere", "General", 0, 0, true)]
     public sealed class LumiereObjectCreatorPackage : AsyncPackage
     {
         /// <summary>
         /// LumiereObjectCreatorPackage GUID string.
         /// </summary>
-        public const string PackageGuidString = "8a42c1ba-f922-4274-bead-12214bbff2dd";
-
+        /// [Guid("150CD9C3-94E6-45DA-9360-76573B48B61F")]
+        public const string PackageGuidString = "150CD9C3-94E6-45DA-9360-76573B48B61F";
         public EnvDTE.DTE _DTE;
-
         #region Package Members
 
         /// <summary>
@@ -56,6 +54,6 @@ namespace LumiereObjectCreator
             await BuildLumiereObject.InitializeAsync(this);
         }
 
-        #endregion Package Members
+        #endregion
     }
 }
