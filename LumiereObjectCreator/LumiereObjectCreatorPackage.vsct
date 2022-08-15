@@ -34,11 +34,18 @@
           <ButtonText>Build!</ButtonText>
         </Strings>
       </Button>
+      <Button guid="guidLumiereObjectCreatorPackageCmdSet" id="CleanLumiereObjectId" priority="0x0200" type="Button">
+        <Parent guid="guidLumiereObjectCreatorPackageCmdSet" id="MyMenuGroup" />
+        <Icon guid="guidImages" id="cleanIcon" />
+        <Strings>
+          <ButtonText>Regenerate!</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
     <Bitmaps>
-      <Bitmap guid="guidImages" href="Resources\CreateLumiereObject.png" usedList="lumiereIcon, buildIcon"  />
+      <Bitmap guid="guidImages" href="Resources\CreateLumiereObject.png" usedList="lumiereIcon, buildIcon, cleanIcon"  />
     </Bitmaps>
   </Commands>
 
@@ -54,11 +61,13 @@
       <IDSymbol name="MyMenuGroup" value="0x1020" />
       <IDSymbol name="CreateLumiereObjectId" value="0x0100" />
       <IDSymbol name="BuildLumiereObjectId" value="0x0200" />
+      <IDSymbol name="CleanLumiereObjectId" value="0x0300" />
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{2f4be332-a21b-4eb1-a56d-12539ce2485d}">
       <IDSymbol name="lumiereIcon" value="1" />
       <IDSymbol name="buildIcon" value="2" />
+      <IDSymbol name="cleanIcon" value="3" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

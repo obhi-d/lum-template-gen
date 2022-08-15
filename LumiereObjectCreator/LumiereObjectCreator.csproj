@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="BaseDialogWindow.cs" />
     <Compile Include="BuildConfig.cs" />
+    <Compile Include="CleanLumiereObject.cs" />
     <Compile Include="BuildLumiereObject.cs" />
     <Compile Include="BuildType.xaml.cs">
       <DependentUpon>BuildType.xaml</DependentUpon>
